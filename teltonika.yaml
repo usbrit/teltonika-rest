@@ -1,0 +1,141 @@
+rest:
+  - resource: "http://your_outer_ip_here/api/login"
+    scan_interval: 60
+    verify_ssl: false
+    method: POST
+    headers:
+      Content-Type: application/json
+    payload: '{"username":"your_username","password":"your_password"}'
+    sensor:
+      - name: teltonika_token
+        value_template: "{{ value_json.data.token }}"
+
+  # Device Status Sensor with Bearer Token
+  - resource_template: "http://your_outer_ip_here/api/gps/position/status"
+    scan_interval: 60
+    verify_ssl: false
+    method: GET
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ states('sensor.teltonika_token') }}"
+    sensor:
+      - name: teltonika_gps_status
+        value_template: "{{ value_json.data }}" 
+        json_attributes_path: "$.data" # Or a more specific JSONPath if needed
+        json_attributes:
+          - "accuracy" # Replace with actual attribute names from the JSON response
+          - "altitude"
+          - "latitude"
+          - "longitude"
+          - "speed"
+          - "satellites"
+
+  - resource: "http://your_outer_ip_here/api/modems/status"
+    scan_interval: 60
+    verify_ssl: false
+    method: GET
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ states('sensor.teltonika_token') }}"
+    sensor:
+      - name: teltonika_connection_type
+        value_template: "{{ value_json.data[0].conntype }}"
+      - name: teltonika_mobile_provider
+        value_template: "{{ value_json.data[0].provider }}"
+      - name: teltonika_mobile_imei
+        value_template: "{{ value_json.data[0].imei }}"
+      - name: teltonika_mobile_oper
+        value_template: "{{ value_json.data[0].oper }}"
+      - name: teltonika_mobile_sim
+        value_template: "{{ value_json.data[0].sim }}"
+      - name: teltonika_mobile_state
+        value_template: "{{ value_json.data[0].state }}"
+
+  - resource: "http://your_outer_ip_here/api/wireless/interfaces/status"
+    scan_interval: 15
+    verify_ssl: false
+    method: GET
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ states('sensor.teltonika_token') }}"
+    sensor:
+      - name: teltonika_wifi_ssid
+        value_template: "{{ value_json.data[0].ssid }}"
+      - name: teltonika_wifi_interface
+        value_template: "{{ value_json.data[0].ifname }}"
+      - name: teltonika_wifi_band
+        value_template: "{{ value_json.data[0].band }}"
+      - name: teltonika_wifi_noise
+        value_template: "{{ value_json.data[0].noise }}"
+      - name: teltonika_wifi_clients
+        value_template: "{{ value_json.data[0].clients }}"
+      - name: teltonika_wifi_id
+        value_template: "{{ value_json.data[0].wifi_id }}"
+      - name: teltonika_wifi_signal
+        value_template: "{{ value_json.data[0].signal }}"
+
+      - name: teltonika_client_hostname_1
+        value_template: >
+          {% if value_json.data[0].clients | length > 0 %}
+            {{ value_json.data[0].clients[0].hostname }}
+          {% else %}
+            none
+          {% endif %}
+
+      - name: teltonika_client_hostname_2
+        value_template: >
+          {% if value_json.data[0].clients | length > 1 %}
+            {{ value_json.data[0].clients[1].hostname }}
+          {% else %}
+            none
+          {% endif %}
+
+      - name: teltonika_client_hostname_3
+        value_template: >
+          {% if value_json.data[0].clients | length > 2 %}
+            {{ value_json.data[0].clients[2].hostname }}
+          {% else %}
+            none
+          {% endif %}
+
+      - name: teltonika_client_hostname_4
+        value_template: >
+          {% if value_json.data[0].clients | length > 3 %}
+            {{ value_json.data[0].clients[3].hostname }}
+          {% else %}
+            none
+          {% endif %}
+
+# Create sensors for individual GPS Attributes
+template:
+  - sensor:
+      - name: "Teltonika Latitude"
+        state: "{{ state_attr('sensor.teltonika_gps_status', 'latitude') }}"
+        unit_of_measurement: "°"
+        icon: mdi:map-marker
+
+      - name: "Teltonika Longitude"
+        state: "{{ state_attr('sensor.teltonika_gps_status', 'longitude') }}"
+        unit_of_measurement: "°"
+        icon: mdi:map-marker
+
+      - name: "Teltonika Altitude"
+        state: "{{ state_attr('sensor.teltonika_gps_status', 'altitude') }}"
+        unit_of_measurement: "m"
+        icon: mdi:altimeter
+
+      - name: "Teltonika Speed"
+        state: "{{ state_attr('sensor.teltonika_gps_status', 'speed') }}"
+        unit_of_measurement: "km/h"
+        icon: mdi:speedometer
+
+      - name: "Teltonika GPS Accuracy"
+        state: "{{ state_attr('sensor.teltonika_gps_status', 'accuracy') }}"
+        unit_of_measurement: "m"
+        icon: mdi:target
+
+      - name: "Teltonika Satellites"
+        state: "{{ state_attr('sensor.teltonika_gps_status', 'satellites') }}"
+        icon: mdi:satellite-variant
+
+        
