@@ -1,17 +1,18 @@
 rest:
-  - resource: "http://your_outer_ip_here/api/login"
+  - resource: "http://<your_router_ip_here>/api/login"
     scan_interval: 60
     verify_ssl: false
     method: POST
     headers:
       Content-Type: application/json
-    payload: '{"username":"your_username","password":"your_password"}'
+    payload: '{"username":"<your_username_here>","password":"<Your_password_here>"}'
     sensor:
-      - name: teltonika_token
+      - name: Teltonika Token
+        unique_id: teltonika_token
         value_template: "{{ value_json.data.token }}"
 
   # Device Status Sensor with Bearer Token
-  - resource_template: "http://your_outer_ip_here/api/gps/position/status"
+  - resource_template: "http://<your_router_ip_here>/api/gps/position/status"
     scan_interval: 60
     verify_ssl: false
     method: GET
@@ -19,8 +20,9 @@ rest:
       Content-Type: application/json
       Authorization: "Bearer {{ states('sensor.teltonika_token') }}"
     sensor:
-      - name: teltonika_gps_status
-        value_template: "{{ value_json.data }}" 
+      - name: Teltonika GPS Status
+        unique_id: teltonika_gps_status
+        value_template: "{{ value_json.data }}" #Replace 'some_status_field' with an actual field from the API response you want as the sensor's state
         json_attributes_path: "$.data" # Or a more specific JSONPath if needed
         json_attributes:
           - "accuracy" # Replace with actual attribute names from the JSON response
@@ -30,7 +32,7 @@ rest:
           - "speed"
           - "satellites"
 
-  - resource: "http://your_outer_ip_here/api/modems/status"
+  - resource: "http://<your_router_ip_here>/api/modems/status"
     scan_interval: 60
     verify_ssl: false
     method: GET
@@ -38,43 +40,70 @@ rest:
       Content-Type: application/json
       Authorization: "Bearer {{ states('sensor.teltonika_token') }}"
     sensor:
-      - name: teltonika_connection_type
+      - name: Teltonika Connection Type
+        unique_id: teltonika_connection_type
         value_template: "{{ value_json.data[0].conntype }}"
-      - name: teltonika_mobile_provider
+        icon: mdi:connection
+      - name: Teltonika Mobile Provider
+        unique_id: teltonika_mobile_provider
         value_template: "{{ value_json.data[0].provider }}"
-      - name: teltonika_mobile_imei
+        icon: mdi:sim
+      - name: Teltonika Mobile IMEI
+        unique_id: teltonika_mobile_imei
         value_template: "{{ value_json.data[0].imei }}"
-      - name: teltonika_mobile_oper
+        icon: mdi:identifier
+      - name: Teltonika Mobile Operator
+        unique_id: teltonika_mobile_operator
         value_template: "{{ value_json.data[0].oper }}"
-      - name: teltonika_mobile_sim
+        icon: mdi:cellphone
+      - name: Teltonika Mobile SIM
+        unique_id: teltonika_mobile_sim
         value_template: "{{ value_json.data[0].sim }}"
-      - name: teltonika_mobile_state
+        icon: mdi:sim-outline
+      - name: Teltonika Mobile State
+        unique_id: teltonika_mobile_state
         value_template: "{{ value_json.data[0].state }}"
+        icon: mdi:signal-cellular-3
 
-  - resource: "http://your_outer_ip_here/api/wireless/interfaces/status"
-    scan_interval: 15
+  - resource: "http://<your_router_ip_here>/api/wireless/interfaces/status"
+    scan_interval: 60
     verify_ssl: false
     method: GET
     headers:
       Content-Type: application/json
       Authorization: "Bearer {{ states('sensor.teltonika_token') }}"
     sensor:
-      - name: teltonika_wifi_ssid
+      - name: Teltonika WiFi SSID
+        unique_id: teltonika_wifi_speed
         value_template: "{{ value_json.data[0].ssid }}"
-      - name: teltonika_wifi_interface
+        icon: mdi:wifi
+      - name: Teltonika WiFi Interface
+        unique_id: teltonika_wifi_interface
         value_template: "{{ value_json.data[0].ifname }}"
-      - name: teltonika_wifi_band
+        icon: mdi:ethernet
+      - name: Teltonika WiFi Band
+        unique_id: teltonika_wifi_band
         value_template: "{{ value_json.data[0].band }}"
-      - name: teltonika_wifi_noise
+        icon: mdi:radio
+      - name: Teltonika WiFi Noise
+        unique_id: teltonika_wifi_noise
         value_template: "{{ value_json.data[0].noise }}"
-      - name: teltonika_wifi_clients
+        icon: mdi:volume-high
+      - name: Teltonika WiFi Clients
+        unique_id: teltonika_wifi_clients
         value_template: "{{ value_json.data[0].clients }}"
-      - name: teltonika_wifi_id
+        icon: mdi:account-multiple
+      - name: Teltonika WiFi ID
+        unique_id: teltonika_wifi_id
         value_template: "{{ value_json.data[0].wifi_id }}"
-      - name: teltonika_wifi_signal
+        icon: mdi:identifier
+      - name: Teltonika WiFi Signal
+        unique_id: teltonika_wifi_signal
         value_template: "{{ value_json.data[0].signal }}"
+        icon: mdi:signal
 
-      - name: teltonika_client_hostname_1
+      - name: Teltonika Client 1
+        unique_id: teltonika_client_1
         value_template: >
           {% if value_json.data[0].clients | length > 0 %}
             {{ value_json.data[0].clients[0].hostname }}
@@ -82,7 +111,8 @@ rest:
             none
           {% endif %}
 
-      - name: teltonika_client_hostname_2
+      - name: Teltonika Client 2
+        unique_id: teltonika_client_2
         value_template: >
           {% if value_json.data[0].clients | length > 1 %}
             {{ value_json.data[0].clients[1].hostname }}
@@ -90,7 +120,8 @@ rest:
             none
           {% endif %}
 
-      - name: teltonika_client_hostname_3
+      - name: Teltonika Client 3
+        unique_id: teltonika_client_3
         value_template: >
           {% if value_json.data[0].clients | length > 2 %}
             {{ value_json.data[0].clients[2].hostname }}
@@ -98,7 +129,8 @@ rest:
             none
           {% endif %}
 
-      - name: teltonika_client_hostname_4
+      - name: Teltonika Client 4
+        unique_id: teltonika_client_4
         value_template: >
           {% if value_json.data[0].clients | length > 3 %}
             {{ value_json.data[0].clients[3].hostname }}
@@ -110,32 +142,39 @@ rest:
 template:
   - sensor:
       - name: "Teltonika Latitude"
+        unique_id: teltonika_latitude
         state: "{{ state_attr('sensor.teltonika_gps_status', 'latitude') }}"
         unit_of_measurement: "°"
-        icon: mdi:map-marker
+        icon: mdi:latitude
 
       - name: "Teltonika Longitude"
+        unique_id: teltonika_longitude
         state: "{{ state_attr('sensor.teltonika_gps_status', 'longitude') }}"
         unit_of_measurement: "°"
-        icon: mdi:map-marker
+        icon: mdi:longitude
 
       - name: "Teltonika Altitude"
+        unique_id: teltonika_ltitude
         state: "{{ state_attr('sensor.teltonika_gps_status', 'altitude') }}"
         unit_of_measurement: "m"
         icon: mdi:altimeter
 
       - name: "Teltonika Speed"
+        unique_id: teltonika_speed
         state: "{{ state_attr('sensor.teltonika_gps_status', 'speed') }}"
         unit_of_measurement: "km/h"
         icon: mdi:speedometer
 
       - name: "Teltonika GPS Accuracy"
+        unique_id: teltonika_accuracy
         state: "{{ state_attr('sensor.teltonika_gps_status', 'accuracy') }}"
         unit_of_measurement: "m"
         icon: mdi:target
 
       - name: "Teltonika Satellites"
+        unique_id: teltonika_satellites
         state: "{{ state_attr('sensor.teltonika_gps_status', 'satellites') }}"
         icon: mdi:satellite-variant
+
 
         
